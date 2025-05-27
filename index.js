@@ -2,12 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
-const connectDatabase = require('./src/database/config');
+const connectDatabase = require('./src/database/db.js');
 
 
 const artisanRoutes = require('./src/routes/artisan.route');
-const adminRoutes = require('./src/routes/admin.route');
-const userRoutes = require('./src/routes/user.route');
+//const adminRoutes = require('./src/routes/admin.route');
+//const userRoutes = require('./src/routes/user.route');
 
 
 const app = express();
@@ -33,8 +33,8 @@ app.use('/public', express.static(path.join(__dirname, 'src/public')));
 
 
 app.use('/api/artisans', artisanRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/users', userRoutes);
+//app.use('/api/admin', adminRoutes);
+//app.use('/api/users', userRoutes);
 
 
 app.get('/', (req, res) => {
