@@ -38,7 +38,7 @@ app.use('/api/artisans', artisanRoutes);
 
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to FindArtisan API' });
+    res.send( 'Welcome to HireMe API' );
 });
 
 
