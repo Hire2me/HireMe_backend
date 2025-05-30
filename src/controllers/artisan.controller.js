@@ -6,21 +6,32 @@ const nodemailer = require('nodemailer');
 const artisanController = {
     async signup(req, res) {
         try {
-            const { fullName, email, password } = req.body;
+            const { fullName, email, phoneNumber, password } = req.body;
 
-            if (!fullName || !email || !password) {
+            if (!fullName || !email || !phoneNumber || !password) {
                 return res.status(400).json({ message: 'All fields are required' });
             }
 
-            const existingArtisan = await Artisan.findOne({ email });
+            const existingArtisan = await Artisan.findOne({ 
+                $or: [
+                    { email },
+                    { phoneNumber }
+                ]
+            });
             if (existingArtisan) {
-                return res.status(400).json({ message: 'Email already registered' });
+                if (existingArtisan.email === email) {
+                    return res.status(400).json({ message: 'Email already registered' });
+                }
+                if (existingArtisan.phoneNumber === phoneNumber) {
+                    return res.status(400).json({ message: 'Phone number already registered' });
+                }
             }
 
             const verificationToken = crypto.randomBytes(32).toString('hex');
             const artisan = new Artisan({
                 fullName,
                 email,
+                phoneNumber,
                 password,
                 verificationToken
             });
