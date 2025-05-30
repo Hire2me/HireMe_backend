@@ -12,6 +12,11 @@ const artisanController = {
                 return res.status(400).json({ message: 'All fields are required' });
             }
 
+
+            if (password !== confirmPassword) {
+            return res.status(400).json({ message: 'Passwords do not match' });
+        }
+
             const existingArtisan = await Artisan.findOne({ 
                 $or: [
                     { email },
