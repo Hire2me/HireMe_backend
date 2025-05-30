@@ -41,6 +41,14 @@ const artisanSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    verificationOTP: {
+        type: String,
+        default: null
+    },
+    otpExpires: {
+        type: Date,
+        default: null
+    },
     verificationToken: {
         type: String,
         default: null
@@ -83,7 +91,7 @@ artisanSchema.methods.generatePasswordResetToken = function() {
         .createHash('sha256')
         .update(resetToken)
         .digest('hex');
-    this.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    this.resetPasswordExpires = Date.now() + 3600000; 
     return resetToken;
 };
 
@@ -91,6 +99,13 @@ artisanSchema.methods.generatePasswordResetToken = function() {
 artisanSchema.methods.clearPasswordResetToken = function() {
     this.resetPasswordToken = null;
     this.resetPasswordExpires = null;
+};
+
+artisanSchema.methods.generateOTP = function() {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    this.verificationOTP = otp;
+    this.otpExpires = Date.now() + 600000; 
+    return otp;
 };
 
 const Artisan = mongoose.model('Artisan', artisanSchema);

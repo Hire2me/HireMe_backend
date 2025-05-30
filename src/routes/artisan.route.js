@@ -8,7 +8,7 @@ router.post('/signup', artisanController.signup);
 router.post('/login', artisanController.login);
 router.post('/forgot-password', artisanController.forgotPassword);
 router.post('/reset-password', artisanController.resetPassword);
-router.get('/verify-email/:token', artisanController.verifyEmail);
+router.post('/verify-email', artisanController.verifyEmail);
 
 router.get('/debug/:email', async (req, res) => {
     try {

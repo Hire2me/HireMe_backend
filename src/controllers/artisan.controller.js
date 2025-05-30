@@ -6,7 +6,7 @@ const nodemailer = require('nodemailer');
 const artisanController = {
     async signup(req, res) {
         try {
-            const { fullName, email, phoneNumber, password } = req.body;
+            const { fullName, email, phoneNumber, password, confirmPassword } = req.body;
 
             if (!fullName || !email || !phoneNumber || !password) {
                 return res.status(400).json({ message: 'All fields are required' });
@@ -32,30 +32,25 @@ const artisanController = {
                 }
             }
 
-            const verificationToken = crypto.randomBytes(32).toString('hex');
-            console.log('Generated token:', verificationToken);
-
+            
             const artisan = new Artisan({
                 fullName,
                 email,
                 phoneNumber,
                 password,
-                verificationToken,
                 isEmailVerified: false
             });
 
+            const otp = artisan.generateOTP();
+            console.log('Generated OTP:', otp);
+
             await artisan.save();
 
-            const savedArtisan = await Artisan.findById(artisan._id); 
-            console.log('Saved artisan token:', savedArtisan.verificationToken);
-            
-            
-            const verifyEmailLink = `${process.env.BASE_URL}/api/artisans/verify-email/${verificationToken}`;
             
             res.status(201).json({ 
-                message: 'Registration successful. Please verify your email.',
-                verifyEmailLink, 
-                verificationToken: verificationToken
+                message: 'Registration successful. Please verify your email with the OTP.',
+                email: artisan.email,
+                otp 
             });
         } catch (error) {
             console.error('Signup error:', error);
@@ -118,17 +113,22 @@ const artisanController = {
                 return res.status(404).json({ message: 'No artisan found with this email' });
             }
 
-            const resetToken = artisan.generatePasswordResetToken();
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        artisan.resetPasswordToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
+        artisan.resetPasswordExpires = Date.now() + 3600000; 
+
             await artisan.save();
 
-            
-            const resetLink = `${process.env.BASE_URL}/reset-password/${resetToken}`;
-
+         
             res.status(200).json({
-                message: 'Password reset instructions sent to email',
-                resetLink
+                message: 'Password reset token sent successfully',
+                resetToken
             });
         } catch (error) {
+            console.error('Forgot password error:', error);
             res.status(500).json({ message: error.message });
         }
     },
@@ -138,11 +138,16 @@ const artisanController = {
             const { token, newPassword } = req.body;
 
             if (!token || !newPassword) {
-                return res.status(400).json({ message: 'Token and new password are required' });
+                return res.status(400).json({ message: 'Reset token and new password are required' });
             }
+           
+            const resetPasswordToken = crypto
+            .createHash('sha256')
+            .update(token)
+            .digest('hex');
 
             const artisan = await Artisan.findOne({
-                resetPasswordToken: token,
+                resetPasswordToken: resetPasswordToken,
                 resetPasswordExpires: { $gt: Date.now() }
             });
 
@@ -151,47 +156,47 @@ const artisanController = {
             }
 
             artisan.password = newPassword;
-            artisan.clearPasswordResetToken();
+            artisan.resetPasswordToken = undefined;
+            artisan.resetPasswordExpires = undefined;
             await artisan.save();
 
             res.status(200).json({ message: 'Password reset successful' });
         } catch (error) {
+            console.error('Reset password error:', error);
             res.status(500).json({ message: error.message });
         }
     },
 
     async verifyEmail(req, res) {
         try {
-            const { token } = req.params;
-            console.log('Attempting to verify token:', token);
+            const { email, otp } = req.body;
+            
+        if (!email || !otp) {
+                return res.status(400).json({ 
+                    message: 'Email and OTP are required'
+                });
+            }
+
 
         const artisan = await Artisan.findOne({ 
-            verificationToken: token,
-            isEmailVerified: false 
+            email,
+            verificationOTP: otp,
+            otpExpires: { $gt: Date.now() },
+            isEmailVerified: false
         });
-
-        
-        const allArtisans = await Artisan.find({});
-        console.log('All artisans:', JSON.stringify(allArtisans.map(a => ({
-            email: a.email,
-            token: a.verificationToken,
-            isVerified: a.isEmailVerified
-        })), null, 2));
 
        
      if (!artisan) {
                return res.status(400).json({ 
-                message: 'Invalid verification token',
-                debug: 'No artisan found with this token'
+                message: 'Invalid or expired OTP',
             });
         }
 
 
             artisan.isEmailVerified = true;
-            artisan.verificationToken = undefined;
+            artisan.verificationOTP = undefined;  
+            artisan.otpExpires = undefined;
             await artisan.save();
-
-            console.log('Successfully verified artisan:', artisan.email);
 
             res.status(200).json({ 
                 message: 'Email verified successfully',
