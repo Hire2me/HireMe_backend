@@ -28,24 +28,32 @@ const artisanController = {
             }
 
             const verificationToken = crypto.randomBytes(32).toString('hex');
+            console.log('Generated token:', verificationToken);
+
             const artisan = new Artisan({
                 fullName,
                 email,
                 phoneNumber,
                 password,
-                verificationToken
+                verificationToken,
+                isEmailVerified: false
             });
 
             await artisan.save();
+
+            const savedArtisan = await Artisan.findById(artisan._id); 
+            console.log('Saved artisan token:', savedArtisan.verificationToken);
             
             
-            const verifyEmailLink = `${process.env.BASE_URL}/api/artisan/verify-email/${verificationToken}`;
+            const verifyEmailLink = `${process.env.BASE_URL}/api/artisans/verify-email/${verificationToken}`;
             
             res.status(201).json({ 
                 message: 'Registration successful. Please verify your email.',
-                verifyEmailLink 
+                verifyEmailLink, 
+                verificationToken: verificationToken
             });
         } catch (error) {
+            console.error('Signup error:', error);
             res.status(500).json({ message: error.message });
         }
     },
@@ -150,18 +158,42 @@ const artisanController = {
     async verifyEmail(req, res) {
         try {
             const { token } = req.params;
+            console.log('Attempting to verify token:', token);
 
-            const artisan = await Artisan.findOne({ verificationToken: token });
-            if (!artisan) {
-                return res.status(400).json({ message: 'Invalid verification token' });
-            }
+        const artisan = await Artisan.findOne({ 
+            verificationToken: token,
+            isEmailVerified: false 
+        });
+
+        
+        const allArtisans = await Artisan.find({});
+        console.log('All artisans:', JSON.stringify(allArtisans.map(a => ({
+            email: a.email,
+            token: a.verificationToken,
+            isVerified: a.isEmailVerified
+        })), null, 2));
+
+       
+     if (!artisan) {
+               return res.status(400).json({ 
+                message: 'Invalid verification token',
+                debug: 'No artisan found with this token'
+            });
+        }
+
 
             artisan.isEmailVerified = true;
             artisan.verificationToken = undefined;
             await artisan.save();
 
-            res.status(200).json({ message: 'Email verified successfully' });
+            console.log('Successfully verified artisan:', artisan.email);
+
+            res.status(200).json({ 
+                message: 'Email verified successfully',
+                email: artisan.email
+            });
         } catch (error) {
+            console.error('Verification error:', error); 
             res.status(500).json({ message: error.message });
         }
     }
