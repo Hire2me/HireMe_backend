@@ -18,15 +18,21 @@ const artisanSchema = new mongoose.Schema({
         lowercase: true,
         match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
     },
+    googleId:{
+        type: String,
+        unique: true,
+        sparse: true
+
+    },
     phoneNumber: {
         type: String,
-        required: [true, 'Phone number is required'],
+        required: [false, 'Phone number is required'],
         trim: true,
         match: [/^\+?[\d\s-]+$/, 'Please enter a valid phone number']
     },
     password: {
         type: String,
-        required: [true, 'Password is required'],
+        required: [false, 'Password is required'],
         minlength: [8, 'Password must be at least 8 characters']
     },
     resetPasswordToken: {
