@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dashbroad - Passport Auth</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <h2>Welcome to dashbroad</h2>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+
+    <div class="profile-section">
+        <div id="userProfile">
+            Loading profile...
+        </div>
+    </div>
+
+    <script>
+        // Fetch user profile data
+        fetch('/api/users/profile', { credentials: 'include' })
+
+        .then(response => response.json())
+        .then(data => {
+            console.log('User profile:', data);
+            
+            const profileHTML = `
+                 ${data.profilePicture ? `<img src="${data.profilePicture}" class="profile-image" alt="Profile">` : ''}
+                <h3>${data.firstName} ${data.lastName}</h3>
+                <p>Email: ${data.email || 'N/A'}</p>
+                <p>Account type: ${data.googleId ? 'Google Account' : 'Local Account'}</p>
+            `;
+            document.getElementById('userProfile').innerHTML = profileHTML;
+        })
+        .catch(err => {
+            console.error('Failed to load profile:', err);
+            document.getElementById('userProfile').innerHTML = 'Failed to load profile';
+        });
+
+        function handleLogout() {
+            fetch('/api/users/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(() => {
+                window.location.href = '/login';
+            })
+            .catch(err => console.error('Logout failed:', err));
+        }
+    </script>
+</body>
+</html>
