@@ -1,7 +1,9 @@
 const Artisan = require('../models/artisan.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+dotenv.config();
+const sendOTPEmail = require('../email/email.sender'); 
 
 const artisanController = {
     async signup(req, res) {
@@ -12,10 +14,9 @@ const artisanController = {
                 return res.status(400).json({ message: 'All fields are required' });
             }
 
-
             if (password !== confirmPassword) {
-            return res.status(400).json({ message: 'Passwords do not match' });
-        }
+                return res.status(400).json({ message: 'Passwords do not match' });
+            }
 
             const existingArtisan = await Artisan.findOne({ 
                 $or: [
@@ -32,7 +33,6 @@ const artisanController = {
                 }
             }
 
-            
             const artisan = new Artisan({
                 fullName,
                 email,
@@ -46,9 +46,21 @@ const artisanController = {
 
             await artisan.save();
 
+            // Generate JWT token for new user (for verification purposes)
+            const token = jwt.sign(
+                { 
+                    id: artisan._id,
+                    email: artisan.email 
+                },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' } // Shorter expiry for verification
+            );
+            
+              await sendOTPEmail(email, otp);
             
             res.status(201).json({ 
                 message: 'Registration successful. Please verify your email with the OTP.',
+                token, // Include token for verification
                 email: artisan.email,
                 otp 
             });
@@ -81,7 +93,10 @@ const artisanController = {
             }
 
             const token = jwt.sign(
-                { artisanId: artisan._id },
+                { 
+                    id: artisan._id,
+                    email: artisan.email // Include email in JWT payload
+                },
                 process.env.JWT_SECRET,
                 { expiresIn: '24h' }
             );
@@ -113,16 +128,15 @@ const artisanController = {
                 return res.status(404).json({ message: 'No artisan found with this email' });
             }
 
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        artisan.resetPasswordToken = crypto
-            .createHash('sha256')
-            .update(resetToken)
-            .digest('hex');
-        artisan.resetPasswordExpires = Date.now() + 3600000; 
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            artisan.resetPasswordToken = crypto
+                .createHash('sha256')
+                .update(resetToken)
+                .digest('hex');
+            artisan.resetPasswordExpires = Date.now() + 3600000; 
 
             await artisan.save();
 
-         
             res.status(200).json({
                 message: 'Password reset token sent successfully',
                 resetToken
@@ -142,9 +156,9 @@ const artisanController = {
             }
            
             const resetPasswordToken = crypto
-            .createHash('sha256')
-            .update(token)
-            .digest('hex');
+                .createHash('sha256')
+                .update(token)
+                .digest('hex');
 
             const artisan = await Artisan.findOne({
                 resetPasswordToken: resetPasswordToken,
@@ -167,43 +181,61 @@ const artisanController = {
         }
     },
 
+   
     async verifyEmail(req, res) {
         try {
-            const { email, otp } = req.body;
+            const { otp } = req.body;
+            const authHeader = req.headers['authorization'];
             
-        if (!email || !otp) {
-                return res.status(400).json({ 
-                    message: 'Email and OTP are required'
-                });
+            if (!authHeader) {
+                return res.status(401).json({ message: 'Authorization header missing' });
+            }
+            
+            const token = authHeader.split(' ')[1];
+            if (!token) {
+                return res.status(401).json({ message: 'Token not found' });
             }
 
+            // Verify token
+            let decodedToken;
+            try {
+                decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+            } catch (error) {
+                if (error.name === 'TokenExpiredError') {
+                    return res.status(401).json({ message: 'Token expired' });
+                }
+                return res.status(403).json({ message: 'Invalid token' });
+            }
 
-        const artisan = await Artisan.findOne({ 
-            email,
-            verificationOTP: otp,
-            otpExpires: { $gt: Date.now() },
-            isEmailVerified: false
-        });
+            // Get email from decoded token
+            const email = decodedToken.email;
 
-       
-     if (!artisan) {
-               return res.status(400).json({ 
-                message: 'Invalid or expired OTP',
+            // Find artisan by email AND verify OTP matches
+            const artisan = await Artisan.findOne({
+                email: email,
+                verificationOTP: otp,
+                otpExpires: { $gt: Date.now() },
+                isEmailVerified: false
             });
-        }
-
-
+            
+            if (!artisan) {
+                return res.status(400).json({
+                    message: 'Invalid or expired OTP'
+                });
+            }
+            
+            // Update artisan verification status
             artisan.isEmailVerified = true;
-            artisan.verificationOTP = undefined;  
+            artisan.verificationOTP = undefined;
             artisan.otpExpires = undefined;
             await artisan.save();
-
-            res.status(200).json({ 
+            
+            res.status(200).json({
                 message: 'Email verified successfully',
                 email: artisan.email
             });
         } catch (error) {
-            console.error('Verification error:', error); 
+            console.error('Verification error:', error);
             res.status(500).json({ message: error.message });
         }
     }
