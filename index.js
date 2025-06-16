@@ -7,6 +7,9 @@ const passport = require('passport');
 const session = require('express-session');
 require('./src/config/passport.setup.js');
 const { isAuthenticated } = require('./src/middleware/auth.js');
+
+const artisanProfileRoutes = require('./src/routes/artisan.profile.route.js');
+
 const authRoute = require('./src/routes/auth.route.js')
 const cors = require('cors');
 
@@ -59,7 +62,8 @@ app.use((req, res, next) => {
 
 
 app.use('/api/artisans', artisanRoutes);
-app.use('/auth', authRoute)
+app.use('/auth', authRoute);
+app.use('/api/artisan/', artisanProfileRoutes);
 //app.use('/api/admin', adminRoutes);
 //app.use('/api/users', userRoutes);
 
