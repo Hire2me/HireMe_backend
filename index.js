@@ -7,9 +7,11 @@ const passport = require('passport');
 const session = require('express-session');
 require('./src/config/passport.setup.js');
 const { isAuthenticated } = require('./src/middleware/auth.js');
-const authRoute = require('./src/routes/auth.route.js');
+
 const artisanProfileRoutes = require('./src/routes/artisan.profile.route.js');
 
+const authRoute = require('./src/routes/auth.route.js')
+const cors = require('cors');
 
 const artisanRoutes = require('./src/routes/artisan.route');
 //const adminRoutes = require('./src/routes/admin.route');
@@ -23,6 +25,17 @@ connectDatabase();
 
 
 app.use(express.json());
+// app.use(cors({
+//    origin: ['http://localhost:3000','https://hireme-backend-6lkg.onrender.com'],
+//   credentials: true,
+// }));
+app.use(cors({
+  origin: (origin, callback) => {
+    callback(null, origin); 
+  },
+  credentials: true,
+}));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
