@@ -23,7 +23,7 @@ connectDatabase();
 
 app.use(express.json());
 app.use(cors({
-   origin: 'https://hireme-backend-6lkg.onrender.com',
+   origin: ['http://localhost:3000','https://hireme-backend-6lkg.onrender.com'],
   credentials: true,
 }));
 app.use(express.urlencoded({ extended: true }));
