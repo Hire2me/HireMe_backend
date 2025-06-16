@@ -5,35 +5,103 @@ const crypto = require('crypto');
 const artisanSchema = new mongoose.Schema({
     fullName: {
         type: String,
-        required: [true, 'Full name is required'],
+        required: function () {
+      return this.issignup;
+    },
         trim: true,
         minlength: [2, 'Full name must be at least 2 characters'],
         maxlength: [50, 'Full name cannot exceed 50 characters']
     },
     email: {
         type: String,
-        required: [true, 'Email is required'],
+        required: function () {
+      return this.issignup;
+    },
         unique: true,
         trim: true,
         lowercase: true,
         match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
     },
-    googleId:{
+    googleId: {
         type: String,
         unique: true,
         sparse: true
-
     },
     phoneNumber: {
         type: String,
-        required: [false, 'Phone number is required'],
         trim: true,
         match: [/^\+?[\d\s-]+$/, 'Please enter a valid phone number']
     },
     password: {
         type: String,
-        required: [false, 'Password is required'],
         minlength: [8, 'Password must be at least 8 characters']
+    },
+    businessName: {
+        type: String,
+        required: function () {
+      return this.isCreatingProfile;
+    },
+        trim: true
+    },
+    businessAddress: {
+        type: String,
+        required: function () {
+      return this.isCreatingProfile;
+    },
+        trim: true
+    },
+    profilePicture: {
+        type: String,
+        required: function () {
+      return this.isCreatingProfile;
+    },
+        
+    },
+    coverPicture: {
+        type: String
+    },
+    occupation: {
+        type: String,
+        required: function () {
+      return this.isCreatingProfile;
+    },
+        trim: true
+    },
+    occupationType: {
+        type: String,
+       required: function () {
+      return this.isCreatingProfile;
+    },
+    },
+    Bio: {
+        type: String,
+       required: function () {
+      return this.isCreatingProfile;
+    },
+        trim: true
+    },
+    availabilityDays: {
+        type: [String],
+required: function () {
+      return this.isCreatingProfile;
+    },    },
+    availabilityHours: {
+        type: String,
+       required: function () {
+      return this.isCreatingProfile;
+    },
+    },
+    businessCertificate: {
+        type: String,
+        required: function () {
+      return this.isCreatingProfile;
+    },
+    },
+    NIN: {
+        type: String,
+        required: function () {
+      return this.isCreatingProfile;
+    },
     },
     resetPasswordToken: {
         type: String,
