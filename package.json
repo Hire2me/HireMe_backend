@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-      "build": "echo 'Skipping build...'"
+    "build": "npm install --legacy-peer-deps && npm run build"
+
+
   },
   "keywords": [],
   "author": "",
