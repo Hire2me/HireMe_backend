@@ -4,8 +4,6 @@ const morgan = require('morgan');
 const connectDB = require('./src/database/db');
 const uploadRoutes = require('./src/routes/upload.routes')
 
-
-
 const app = express();
 app.use(express.json());
 dotenv.config();
