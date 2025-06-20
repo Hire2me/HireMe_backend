@@ -10,7 +10,6 @@ dotenv.config();
 
 connectDB();
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
@@ -20,7 +19,6 @@ app.use('/api/upload', uploadRoutes);
 app.use('/', (req,res) =>{
     res.send('welcome');
 });
-
 
 const PORT = process.env.PORT || 2200;
 app.listen(PORT, () => {
