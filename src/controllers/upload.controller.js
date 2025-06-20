@@ -1,6 +1,6 @@
-const cloudinary = require('../utils/cloudinary');
+const cloudinary = require('../utils/image/cloudinary');
 const WorkImage = require('../models/WorkImage');
-const User = require('../models/User');
+
 
 exports.uploadImages = async (req, res) => {
     const { userId } = req.params;
@@ -8,7 +8,7 @@ exports.uploadImages = async (req, res) => {
     const descriptions = req.body.descriptions || [];
 
     if (files.length < 7) {
-        return res.status(400).json({ message: 'Please upload at least 7 photos' });
+        return res.status(400).json({ message: 'Please upload at least 7 photos, Photos must include the display of your previous works' });
     }
 
     try {
@@ -17,8 +17,10 @@ exports.uploadImages = async (req, res) => {
                 if (error) throw error;
             });
 
-            const imageBuffer = file.buffer.toString('base64');
-            const cloudRes = await cloudinary.uploader.upload(`data:image/jpeg;base64,${imageBuffer}`);
+
+            const cloudRes = await cloudinary.uploader.upload(
+                `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
+            );
 
             return {
                 userId,
