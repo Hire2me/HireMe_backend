@@ -69,8 +69,11 @@ app.use((req, res, next) => {
 
 app.use('/api/artisans', artisanRoutes);
 app.use('/auth', authRoute);
-app.use('/api/artisan/', artisanProfileRoutes);
+
+app.use('/api/artisan', artisanProfileRoutes);
+
  app.use('/api/upload', uploadRoutes);
+
 //app.use('/api/admin', adminRoutes);
 //app.use('/api/users', userRoutes);
 
