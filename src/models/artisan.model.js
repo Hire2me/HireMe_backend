@@ -131,6 +131,13 @@ required: function () {
         type: Date,
         default: null
     },
+     reports: [
+      {
+        reason: String,
+        reportedBy: String, 
+        reportedAt: { type: Date, default: Date.now },
+      },
+    ],
     status: {
         type: String,
         enum: ['active', 'inactive', 'suspended'],
