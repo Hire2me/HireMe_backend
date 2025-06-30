@@ -1,5 +1,5 @@
 const Artisan = require("../models/artisan.model");
-const WorkImage = require("../models/WorkImage.model");
+const WorkImage = require("../models/WorkImage");
 const mongoose = require("mongoose");
 const createProfile = async (req, res) => {
   try {
