@@ -1,6 +1,7 @@
 const Artisan = require("../models/artisan.model");
 const WorkImage = require("../models/WorkImage");
 const mongoose = require("mongoose");
+
 const createProfile = async (req, res) => {
   try {
     const {
@@ -66,23 +67,19 @@ const createProfile = async (req, res) => {
   }
 };
 
-export const getMyProfile = async (req, res) => {
+const getMyProfile = async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user.id);
-
-    // Get artisan info
     const artisan = await Artisan.findOne({ _id: userId }).lean();
 
     if (!artisan) {
       return res.status(404).json({ message: "Artisan profile not found" });
     }
 
-    // Get associated work images
     const workImages = await WorkImage.find({ userId })
       .select("imageUrl description")
       .lean();
 
-    // Destructure only needed fields from artisan
     const {
       _id,
       fullName,
@@ -101,7 +98,6 @@ export const getMyProfile = async (req, res) => {
       Bio,
     } = artisan;
 
-    // Send combined profile + work images
     return res.status(200).json({
       success: true,
       data: {
@@ -120,7 +116,7 @@ export const getMyProfile = async (req, res) => {
         businessCertificate,
         NIN,
         bio: Bio,
-        workImages, // <-- included here
+        workImages,
       },
     });
   } catch (error) {
@@ -216,7 +212,6 @@ const reportArtisan = async (req, res) => {
 const getAllArtisans = async (req, res) => {
   try {
     const { search, occupation, location, page = 1, limit = 10 } = req.query;
-
     const query = {};
 
     if (search) {
@@ -246,7 +241,6 @@ const getAllArtisans = async (req, res) => {
       .lean();
 
     const total = await Artisan.countDocuments(query);
-
     const artisanIds = artisans.map((a) => a._id);
 
     const allImages = await WorkImage.find({ userId: { $in: artisanIds } })
@@ -292,8 +286,6 @@ const getAllArtisans = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   createProfile,
   getMyProfile,
@@ -301,4 +293,3 @@ module.exports = {
   reportArtisan,
   getAllArtisans,
 };
-
