@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Passport Auth</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+        }
+        .welcome {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: #007bff;
+            margin-left: 15px;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <h2>Passport Auth</h2>
+        <div>
+            <a href="/src/views/login.html">Login</a>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+    <div class="welcome">
+        <h1>Welcome to Passport Authentication</h1>
+        <p>Please login to continue</p>
+    </div>
+    
+    <script>
+        function handleLogout() {
+            fetch('/api/users/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(() => {
+                window.location.href = '/login';
+            })
+            .catch(err => console.error('Logout failed:', err));
+        }
+    </script>
+</body>
+</html>
