@@ -1,3 +1,5 @@
+
+
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
@@ -9,6 +11,8 @@ require('./src/config/passport.setup.js');
 const { isAuthenticated } = require('./src/middleware/auth.js');
 
 const artisanProfileRoutes = require('./src/routes/artisan.profile.route.js');
+const uploadRoutes = require('./src/routes/upload.routes')
+
 
 const authRoute = require('./src/routes/auth.route.js')
 const cors = require('cors');
@@ -36,8 +40,10 @@ app.use(cors({
   credentials: true,
 }));
 
+
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -63,7 +69,11 @@ app.use((req, res, next) => {
 
 app.use('/api/artisans', artisanRoutes);
 app.use('/auth', authRoute);
+
 app.use('/api/artisan', artisanProfileRoutes);
+
+ app.use('/api/upload', uploadRoutes);
+
 //app.use('/api/admin', adminRoutes);
 //app.use('/api/users', userRoutes);
 
@@ -132,4 +142,5 @@ process.on('SIGTERM', () => {
         console.log('Process terminated');
         process.exit(0);
     });
+
 });
