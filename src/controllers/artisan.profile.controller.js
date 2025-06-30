@@ -127,9 +127,13 @@ const getMyProfile = async (req, res) => {
 
 const getPublicArtisanProfile = async (req, res) => {
   try {
-    const artisanId = req.params.id;
+    const { email } = req.query;
 
-    const artisan = await Artisan.findById(artisanId)
+    if (!email) {
+      return res.status(400).json({ message: "Email is required in query" });
+    }
+
+    const artisan = await Artisan.findOne({ email })
       .select(
         "-user -resetPasswordToken -resetPasswordExpires -verificationToken -__v -password"
       )
@@ -139,14 +143,13 @@ const getPublicArtisanProfile = async (req, res) => {
       return res.status(404).json({ message: "Artisan not found" });
     }
 
-    const workImages = await WorkImage.find({ userId: artisanId })
+    const workImages = await WorkImage.find({ userId: artisan._id })
       .select("imageUrl description")
       .lean();
 
     const {
       _id,
       fullName,
-      email,
       phoneNumber,
       businessName,
       businessAddress,
@@ -187,11 +190,14 @@ const getPublicArtisanProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 const reportArtisan = async (req, res) => {
   try {
     const artisanId = req.params.id;
-    const { reason } = req.body;
+    const { reason, reporterInfo } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({ message: "Reason is required" });
+    }
 
     const artisan = await Artisan.findById(artisanId);
     if (!artisan) {
@@ -199,7 +205,12 @@ const reportArtisan = async (req, res) => {
     }
 
     artisan.isReported = true;
-    artisan.reports.push({ reason, reportedBy: req.user.id });
+    artisan.reports.push({
+      reason,
+      reportedBy: reporterInfo || "anonymous", // Add email/name/phone if supplied
+      reportedAt: new Date(),
+    });
+
     await artisan.save();
 
     return res.status(200).json({ message: "Artisan reported successfully" });
