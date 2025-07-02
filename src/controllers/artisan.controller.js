@@ -48,7 +48,7 @@ const artisanController = {
       const token = jwt.sign(
         { id: artisan._id, email: artisan.email },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: process.env.JWT_EXPIRES_IN }
       );
 
       await sendOTPEmail(email, otp);

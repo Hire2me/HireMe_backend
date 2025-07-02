@@ -94,7 +94,6 @@ const getMyProfile = async (req, res) => {
       profilePicture,
       coverPicture,
       businessCertificate,
-      NIN,
       Bio,
     } = artisan;
 
@@ -114,7 +113,6 @@ const getMyProfile = async (req, res) => {
         profilePicture,
         coverPicture,
         businessCertificate,
-        NIN,
         bio: Bio,
         workImages,
       },
@@ -127,58 +125,41 @@ const getMyProfile = async (req, res) => {
 
 const getPublicArtisanProfile = async (req, res) => {
   try {
-    const artisanId = req.params.id;
+    const { id } = req.params;
 
-    const artisan = await Artisan.findById(artisanId)
-      .select(
-        "-user -resetPasswordToken -resetPasswordExpires -verificationToken -__v -password"
-      )
+    if (!id) {
+      return res.status(400).json({ message: "Artisan ID is required" });
+    }
+
+    const artisan = await Artisan.findById(id)
+      .select("-user -resetPasswordToken -resetPasswordExpires -verificationToken -__v -password")
       .lean();
 
     if (!artisan) {
       return res.status(404).json({ message: "Artisan not found" });
     }
 
-    const workImages = await WorkImage.find({ userId: artisanId })
+    const workImages = await WorkImage.find({ userId: artisan._id })
       .select("imageUrl description")
       .lean();
-
-    const {
-      _id,
-      fullName,
-      email,
-      phoneNumber,
-      businessName,
-      businessAddress,
-      occupation,
-      occupationType,
-      availabilityDays,
-      availabilityHours,
-      profilePicture,
-      coverPicture,
-      businessCertificate,
-      NIN,
-      Bio,
-    } = artisan;
 
     return res.status(200).json({
       success: true,
       data: {
-        id: _id,
-        fullName,
-        email,
-        phoneNumber,
-        businessName,
-        businessAddress,
-        occupation,
-        occupationType,
-        availabilityDays,
-        availabilityHours,
-        profilePicture,
-        coverPicture,
-        businessCertificate,
-        NIN,
-        bio: Bio,
+        id: artisan._id,
+        fullName: artisan.fullName,
+        email: artisan.email,
+        phoneNumber: artisan.phoneNumber,
+        businessName: artisan.businessName,
+        businessAddress: artisan.businessAddress,
+        occupation: artisan.occupation,
+        occupationType: artisan.occupationType,
+        availabilityDays: artisan.availabilityDays,
+        availabilityHours: artisan.availabilityHours,
+        profilePicture: artisan.profilePicture,
+        coverPicture: artisan.coverPicture,
+        businessCertificate: artisan.businessCertificate,
+        bio: artisan.Bio,
         workImages,
       },
     });
@@ -188,10 +169,16 @@ const getPublicArtisanProfile = async (req, res) => {
   }
 };
 
+
+
 const reportArtisan = async (req, res) => {
   try {
     const artisanId = req.params.id;
-    const { reason } = req.body;
+    const { reason, reporterInfo } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({ message: "Reason is required" });
+    }
 
     const artisan = await Artisan.findById(artisanId);
     if (!artisan) {
@@ -199,7 +186,12 @@ const reportArtisan = async (req, res) => {
     }
 
     artisan.isReported = true;
-    artisan.reports.push({ reason, reportedBy: req.user.id });
+    artisan.reports.push({
+      reason,
+      reportedBy: reporterInfo || "anonymous", // Add email/name/phone if supplied
+      reportedAt: new Date(),
+    });
+
     await artisan.save();
 
     return res.status(200).json({ message: "Artisan reported successfully" });
@@ -208,6 +200,7 @@ const reportArtisan = async (req, res) => {
     res.status(500).json({ message: "Failed to report artisan" });
   }
 };
+
 
 const getAllArtisans = async (req, res) => {
   try {
@@ -265,9 +258,7 @@ const getAllArtisans = async (req, res) => {
         availabilityHours: artisan.availabilityHours,
         profilePicture: artisan.profilePicture,
         coverPicture: artisan.coverPicture,
-        businessCertificate: artisan.businessCertificate,
-        NIN: artisan.NIN,
-        bio: artisan.Bio,
+        businessCertificate: artisan.businessCertificate,        bio: artisan.Bio,
         workImages,
       };
     });
