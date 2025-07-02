@@ -94,7 +94,6 @@ const getMyProfile = async (req, res) => {
       profilePicture,
       coverPicture,
       businessCertificate,
-      NIN,
       Bio,
     } = artisan;
 
@@ -114,7 +113,6 @@ const getMyProfile = async (req, res) => {
         profilePicture,
         coverPicture,
         businessCertificate,
-        NIN,
         bio: Bio,
         workImages,
       },
@@ -127,16 +125,14 @@ const getMyProfile = async (req, res) => {
 
 const getPublicArtisanProfile = async (req, res) => {
   try {
-    const { email } = req.query;
+    const { id } = req.params;
 
-    if (!email) {
-      return res.status(400).json({ message: "Email is required in query" });
+    if (!id) {
+      return res.status(400).json({ message: "Artisan ID is required" });
     }
 
-    const artisan = await Artisan.findOne({ email })
-      .select(
-        "-user -resetPasswordToken -resetPasswordExpires -verificationToken -__v -password"
-      )
+    const artisan = await Artisan.findById(id)
+      .select("-user -resetPasswordToken -resetPasswordExpires -verificationToken -__v -password")
       .lean();
 
     if (!artisan) {
@@ -160,28 +156,27 @@ const getPublicArtisanProfile = async (req, res) => {
       profilePicture,
       coverPicture,
       businessCertificate,
-      NIN,
       Bio,
     } = artisan;
+
 
     return res.status(200).json({
       success: true,
       data: {
-        id: _id,
-        fullName,
-        email,
-        phoneNumber,
-        businessName,
-        businessAddress,
-        occupation,
-        occupationType,
-        availabilityDays,
-        availabilityHours,
-        profilePicture,
-        coverPicture,
-        businessCertificate,
-        NIN,
-        bio: Bio,
+        id: artisan._id,
+        fullName: artisan.fullName,
+        email: artisan.email,
+        phoneNumber: artisan.phoneNumber,
+        businessName: artisan.businessName,
+        businessAddress: artisan.businessAddress,
+        occupation: artisan.occupation,
+        occupationType: artisan.occupationType,
+        availabilityDays: artisan.availabilityDays,
+        availabilityHours: artisan.availabilityHours,
+        profilePicture: artisan.profilePicture,
+        coverPicture: artisan.coverPicture,
+        businessCertificate: artisan.businessCertificate,
+        bio: artisan.Bio,
         workImages,
       },
     });
@@ -190,6 +185,7 @@ const getPublicArtisanProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 const reportArtisan = async (req, res) => {
   try {
     const artisanId = req.params.id;
@@ -207,7 +203,8 @@ const reportArtisan = async (req, res) => {
     artisan.isReported = true;
     artisan.reports.push({
       reason,
-      reportedBy: reporterInfo || "anonymous", // Add email/name/phone if supplied
+      reportedBy: reporterInfo || "anonymous", 
+
       reportedAt: new Date(),
     });
 
@@ -219,6 +216,7 @@ const reportArtisan = async (req, res) => {
     res.status(500).json({ message: "Failed to report artisan" });
   }
 };
+
 
 const getAllArtisans = async (req, res) => {
   try {
@@ -276,9 +274,7 @@ const getAllArtisans = async (req, res) => {
         availabilityHours: artisan.availabilityHours,
         profilePicture: artisan.profilePicture,
         coverPicture: artisan.coverPicture,
-        businessCertificate: artisan.businessCertificate,
-        NIN: artisan.NIN,
-        bio: artisan.Bio,
+        businessCertificate: artisan.businessCertificate,        bio: artisan.Bio,
         workImages,
       };
     });

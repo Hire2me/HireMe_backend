@@ -131,7 +131,13 @@ required: function () {
         type: Date,
         default: null
     },
+
+      isReported: {
+      type: Boolean,
+      default: false,
+    },
      reports: [
+
       {
         reason: String,
         reportedBy: String, 
