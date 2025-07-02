@@ -15,7 +15,9 @@ router.post('/profile', upload.fields([
   ]), authenticateToken, createProfile);
 
 router.get('/profile', authenticateToken, getMyProfile);
+router.get('/get_artisan_profile/:id', getPublicArtisanProfile);
 router.post('/report_artisan/:id', reportArtisan);
 router.get('/all_artisan', getAllArtisans);
+
 
 module.exports = router;
