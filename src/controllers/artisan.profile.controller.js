@@ -188,7 +188,7 @@ const reportArtisan = async (req, res) => {
     artisan.isReported = true;
     artisan.reports.push({
       reason,
-      reportedBy: reporterInfo || "anonymous", // Add email/name/phone if supplied
+      reportedBy: reporterInfo || "anonymous", 
       reportedAt: new Date(),
     });
 

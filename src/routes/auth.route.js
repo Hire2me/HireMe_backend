@@ -10,7 +10,6 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-  // You might want to actually logout the user here using req.logout() if using sessions
   res.send("logging out");
   res.redirect("/");
 });
