@@ -60,7 +60,6 @@ const artisanController = {
             
             res.status(201).json({ 
                 message: 'Registration successful. Please verify your email with the OTP.',
-                token, // Include token for verification
                 email: artisan.email,
                 otp,
                 fullName
