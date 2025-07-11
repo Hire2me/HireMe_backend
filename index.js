@@ -21,7 +21,6 @@ const artisanRoutes = require('./src/routes/artisan.route');
 //const adminRoutes = require('./src/routes/admin.route');
 //const userRoutes = require('./src/routes/user.route');
 
-
 const app = express();
 
 
