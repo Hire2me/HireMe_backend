@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-      "prepare": "npm install --legacy-peer-deps",
-      "build": "tsc"
+    "build": "echo 'Building project...'"
 
 
   },
