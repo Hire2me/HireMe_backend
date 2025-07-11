@@ -62,7 +62,8 @@ const artisanController = {
                 message: 'Registration successful. Please verify your email with the OTP.',
                 token, // Include token for verification
                 email: artisan.email,
-                otp 
+                otp,fullName
+
             });
         } catch (error) {
             console.error('Signup error:', error);
