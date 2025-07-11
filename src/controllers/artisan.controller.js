@@ -6,23 +6,25 @@ dotenv.config();
 const sendOTPEmail = require('../email/email.sender'); 
 
 const artisanController = {
-  async signup(req, res) {
-    try {
-      const { fullName, email, phoneNumber, password, confirmPassword } = req.body;
+    async signup(req, res) {
+        try {
+            const { fullName, email, phoneNumber, password, confirmPassword } = req.body;
 
-      if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
-        return res.status(400).json({ message: 'All fields are required' });
-      }
+            if (!fullName || !email || !phoneNumber || !password) {
+                return res.status(400).json({ message: 'All fields are required' });
+            }
 
-      if (password !== confirmPassword) {
-        return res.status(400).json({ message: 'Passwords do not match' });
-      }
+            if (password !== confirmPassword) {
+                return res.status(400).json({ message: 'Passwords do not match' });
+            }
 
-      const existingArtisan = await Artisan.findOne({
-        $or: [{ email }, { phoneNumber }]
-      });
-      
-       if (existingArtisan) {
+            const existingArtisan = await Artisan.findOne({ 
+                $or: [
+                    { email },
+                    { phoneNumber }
+                ]
+            });
+            if (existingArtisan) {
                 if (existingArtisan.email === email) {
                     return res.status(400).json({ message: 'Email already registered' });
                 }
@@ -30,7 +32,6 @@ const artisanController = {
                     return res.status(400).json({ message: 'Phone number already registered' });
                 }
             }
-
 
             const artisan = new Artisan({
                 fullName,
@@ -59,16 +60,16 @@ const artisanController = {
             
             res.status(201).json({ 
                 message: 'Registration successful. Please verify your email with the OTP.',
+                token,     
                 email: artisan.email,
-                otp,
                 fullName
 
             });
         } catch (error) {
             console.error('Signup error:', error);
             res.status(500).json({ message: error.message });
-
-
+        }
+    },
 
     async login(req, res) {
         try {
@@ -95,7 +96,7 @@ const artisanController = {
             const token = jwt.sign(
                 { 
                     id: artisan._id,
-                    email: artisan.email 
+                    email: artisan.email // Include email in JWT payload
                 },
                 process.env.JWT_SECRET,
                 { expiresIn: '24h' }
@@ -207,8 +208,10 @@ const artisanController = {
                 return res.status(403).json({ message: 'Invalid token' });
             }
 
+            // Get email from decoded token
             const email = decodedToken.email;
 
+            // Find artisan by email AND verify OTP matches
             const artisan = await Artisan.findOne({
                 email: email,
                 verificationOTP: otp,
@@ -222,6 +225,7 @@ const artisanController = {
                 });
             }
             
+            // Update artisan verification status
             artisan.isEmailVerified = true;
             artisan.verificationOTP = undefined;
             artisan.otpExpires = undefined;
