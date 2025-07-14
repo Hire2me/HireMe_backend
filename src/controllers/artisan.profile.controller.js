@@ -143,6 +143,23 @@ const getPublicArtisanProfile = async (req, res) => {
       .select("imageUrl description")
       .lean();
 
+    const {
+      _id,
+      fullName,
+      phoneNumber,
+      businessName,
+      businessAddress,
+      occupation,
+      occupationType,
+      availabilityDays,
+      availabilityHours,
+      profilePicture,
+      coverPicture,
+      businessCertificate,
+      Bio,
+    } = artisan;
+
+
     return res.status(200).json({
       success: true,
       data: {
@@ -169,8 +186,6 @@ const getPublicArtisanProfile = async (req, res) => {
   }
 };
 
-
-
 const reportArtisan = async (req, res) => {
   try {
     const artisanId = req.params.id;
@@ -189,6 +204,7 @@ const reportArtisan = async (req, res) => {
     artisan.reports.push({
       reason,
       reportedBy: reporterInfo || "anonymous", 
+
       reportedAt: new Date(),
     });
 

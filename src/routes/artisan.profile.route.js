@@ -20,4 +20,5 @@ router.post('/report_artisan/:id', reportArtisan);
 router.get('/all_artisan', getAllArtisans);
 router.get('/reported_artisans', authenticateToken, getAllReportedArtisans);
 
+
 module.exports = router;
