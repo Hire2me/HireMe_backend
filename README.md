@@ -209,4 +209,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-> **Made with ❤️ for artisans, by artisans.**
+> **Made with ❤️ for artisans, by HireMe.**
