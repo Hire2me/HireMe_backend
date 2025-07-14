@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {createProfile, getMyProfile, getPublicArtisanProfile, reportArtisan, getAllArtisans} = require('../controllers/artisan.profile.controller');
+const {createProfile, getMyProfile, getPublicArtisanProfile, reportArtisan, getAllArtisans, getAllReportedArtisans} = require('../controllers/artisan.profile.controller');
 const { authenticateToken } = require('../middleware/auth');
 const  upload = require ('../image/multer');
 
@@ -15,7 +15,9 @@ router.post('/profile', upload.fields([
   ]), authenticateToken, createProfile);
 
 router.get('/profile', authenticateToken, getMyProfile);
+router.get('/get_artisan_profile/:id', getPublicArtisanProfile);
 router.post('/report_artisan/:id', reportArtisan);
 router.get('/all_artisan', getAllArtisans);
+router.get('/reported_artisans', authenticateToken, getAllReportedArtisans);
 
 module.exports = router;

@@ -202,6 +202,25 @@ const reportArtisan = async (req, res) => {
 };
 
 
+
+
+const getAllReportedArtisans = async (req, res) => {
+  try {
+    // Find all artisans that have isReported === true
+    const reportedArtisans = await Artisan.find({ isReported: true });
+
+    res.status(200).json({
+      message: 'Reported artisans fetched successfully',
+      count: reportedArtisans.length,
+      data: reportedArtisans,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch reported artisans' });
+  }
+};
+
+
 const getAllArtisans = async (req, res) => {
   try {
     const { search, occupation, location, page = 1, limit = 10 } = req.query;
@@ -283,4 +302,5 @@ module.exports = {
   getPublicArtisanProfile,
   reportArtisan,
   getAllArtisans,
+  getAllReportedArtisans,
 };
