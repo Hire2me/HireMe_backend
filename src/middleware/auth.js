@@ -6,7 +6,7 @@ dotenv.config();
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = authHeader && authHeader.split(' ')[1]; 
     
     if (!token) {
       return res.status(401).json({
@@ -16,14 +16,14 @@ const authenticateToken = async (req, res, next) => {
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // FIX: Use decoded.id directly since tokens use "id" field
+    
     const user = await Artisan.findById(decoded.id);
     
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
     
-    // FIX: Use decoded.id instead of conditional check
+    
     req.user = {
       id: decoded.id,
       email: decoded.email,
@@ -44,7 +44,7 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// Optional: Keep if using session-based auth alongside JWT
+
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
