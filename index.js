@@ -16,8 +16,6 @@ const authRoute = require('./src/routes/auth.route.js')
 const cors = require('cors');
 
 const artisanRoutes = require('./src/routes/artisan.route');
-//const adminRoutes = require('./src/routes/admin.route');
-//const userRoutes = require('./src/routes/user.route');
 
 const app = express();
 
@@ -26,10 +24,7 @@ connectDatabase();
 
 
 app.use(express.json());
-// app.use(cors({
-//    origin: ['http://localhost:3000','https://hireme-backend-6lkg.onrender.com'],
-//   credentials: true,
-// }));
+
 app.use(cors({
   origin: (origin, callback) => {
     callback(null, origin); 
@@ -61,19 +56,12 @@ app.use((req, res, next) => {
 });
 
 
-// app.use('/public', express.static(path.join(__dirname, 'src/public')));
-
-
 app.use('/api/artisans', artisanRoutes);
 app.use('/auth', authRoute);
 
 app.use('/api/artisan', artisanProfileRoutes);
 
- app.use('/api/upload', uploadRoutes);
-
-//app.use('/api/admin', adminRoutes);
-//app.use('/api/users', userRoutes);
-
+ app.use('/api/upload', uploadRoutes)
 
 app.get('/', (req, res) => {
     res.send( 'Welcome to HireMe API' );
@@ -93,7 +81,7 @@ app.get('/dashboard', isAuthenticated, (req, res) => {
     // res.send('welcome');
 });
 app.get('/api/users/profile', (req, res) => {
-    console.log("User Data in /api/users/profile:", req.user); // Debugging log
+    console.log("User Data in /api/users/profile:", req.user); 
 
     if (!req.user) {
         return res.status(401).json({ message: 'Unauthorized' });
