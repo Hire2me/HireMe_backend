@@ -7,7 +7,7 @@ exports.uploadImages = async (req, res) => {
   const files = req.files;
   const descriptions = Array.isArray(req.body.descriptions)
     ? req.body.descriptions
-    : [req.body.descriptions]; // supports both single and multiple descriptions
+    : [req.body.descriptions]; 
 
   if (!files || files.length < 7) {
     return res.status(400).json({
@@ -18,7 +18,7 @@ exports.uploadImages = async (req, res) => {
   try {
     const uploadedImages = files.map((file, i) => ({
       userId,
-      imageUrl: file.path, // this is the Cloudinary URL from multer-storage-cloudinary
+      imageUrl: file.path, 
       description: descriptions[i] || '',
     }));
 

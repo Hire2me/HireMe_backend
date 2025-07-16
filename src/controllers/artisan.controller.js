@@ -46,14 +46,14 @@ const artisanController = {
 
             await artisan.save();
 
-            // Generate JWT token for new user (for verification purposes)
+            
             const token = jwt.sign(
                 { 
                     id: artisan._id,
                     email: artisan.email 
                 },
                 process.env.JWT_SECRET,
-                { expiresIn: '1h' } // Shorter expiry for verification
+                { expiresIn: '1h' } 
             );
             
               await sendOTPEmail(email, otp);
@@ -96,7 +96,7 @@ const artisanController = {
             const token = jwt.sign(
                 { 
                     id: artisan._id,
-                    email: artisan.email // Include email in JWT payload
+                    email: artisan.email
                 },
                 process.env.JWT_SECRET,
                 { expiresIn: '24h' }
@@ -197,7 +197,7 @@ const artisanController = {
                 return res.status(401).json({ message: 'Token not found' });
             }
 
-            // Verify token
+            
             let decodedToken;
             try {
                 decodedToken = jwt.verify(token, process.env.JWT_SECRET);
@@ -208,10 +208,10 @@ const artisanController = {
                 return res.status(403).json({ message: 'Invalid token' });
             }
 
-            // Get email from decoded token
+            
             const email = decodedToken.email;
 
-            // Find artisan by email AND verify OTP matches
+            
             const artisan = await Artisan.findOne({
                 email: email,
                 verificationOTP: otp,
@@ -225,7 +225,7 @@ const artisanController = {
                 });
             }
             
-            // Update artisan verification status
+            
             artisan.isEmailVerified = true;
             artisan.verificationOTP = undefined;
             artisan.otpExpires = undefined;
